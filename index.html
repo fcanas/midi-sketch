@@ -1,32 +1,29 @@
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="description" content="sketch with midi knobs">
-    <meta name="keywords" content="etch-a-sketch, midi, svg">
-    <meta name="author" content="Fabián Cañas">
+    <meta charset='UTF-8'>
+    <meta name='description' content='sketch with midi knobs'>
+    <meta name='keywords' content='etch-a-sketch, midi, svg'>
+    <meta name='author' content='Fabián Cañas'>
 </head>
 <style>
     .container {
         display: flex;
         flex-direction: column;
-        align-content: center;
-        justify-content: center;
+        align-items: center;
     }
     .controls {
         display: flex;
-        justify-content: space-around;
+        justify-content: space-between;
     }
-    #sketch {
+    .sketch {
         border: 1px solid black;
     }
 </style>
 <body>
     <div class='container'>
-        <div>
-            <svg id='sketch' width='256' height='256' xmlns='http://www.w3.org/2000/svg'>
-                <path id='path' d='M0 0' fill='transparent' stroke='black'/>
-            </svg>
-        </div>
+        <svg class='sketch' width='256' height='256' xmlns='http://www.w3.org/2000/svg'>
+            <path id='path' d='M0 0' fill='transparent' stroke='black'/>
+        </svg>
         <div class='controls'>
             <div>
                 <div id='left-knob'>
