@@ -1,45 +1,54 @@
 // @fcanas
 
-// Check if the Web MIDI API is supported by the browser
+// Setup.
 if (navigator.requestMIDIAccess) {
-    
     // Try to connect to the MIDI interface.
     navigator.requestMIDIAccess().then(onSuccess, onFailure);
-    
 } else {
-    console.log('This toy uses web midi apis.');
+    block('This toy uses the Web MIDI API. Open in Chrome.');
 }
 
-// Function executed on successful connection
-function onSuccess(interface) {
-    
-    var noteon,
-    noteoff;
-    // inputs = [];
-    
-    // Grab an array of all available devices
-    var iter = interface.inputs.values();
-    for (var i = iter.next(); i && !i.done; i = iter.next()) {
-        i.value.onmidimessage = getMIDIMessage;;
-        console.log(i)
-    }
-    //console.log(inputs);
+// Block the UI with an error message
+function block(message) {
+    let container = document.getElementsByClassName('container')[0];
+    container.innerHTML = message;
 }
 
 function onFailure(error) {
-    console.log("Could not connect to the MIDI interface");
+    block('This toy uses the MIDI, and something went wrong with that. Grant access to MIDI, or try again.');
 }
 
+function onSuccess(interface) {
+    // All available devices
+    var iter = interface.inputs.values();
+    var total = 0;
+    for (var i = iter.next(); i && !i.done; i = iter.next()) {
+        i.value.onmidimessage = getMIDIMessage;;
+        total += 1;
+    }
+
+    if (total < 1) {
+        block('No MIDI device was found. Please connect one and reload the page. Get one with knobs if you can.');
+        return;
+    }
+}
+
+// Drawing scale (MIDI values are 0-127, so 2x makes the size 254)
 let scale = 2;
 
+// What input is being configured
 var configuring = null;
+
+// Identity of the controls
 var leftControl = null;
 var rightControl = null;
 var shakeControl = null;
 
+// Position of stylus
 var x = null;
 var y = null;
 
+// Data string for svg path
 var d = '';
 
 function getMIDIMessage(midiMessage) {
@@ -47,6 +56,7 @@ function getMIDIMessage(midiMessage) {
 
     // If we're configuring...
     if (configuring != null) {
+        var needsInit = d == '';
         switch (configuring) {
             case 'left':
                 leftControl = data[1];
@@ -61,7 +71,13 @@ function getMIDIMessage(midiMessage) {
                 break;
         }
         configuring = null;
-        d = 'M' + x + ' ' + y;
+        // Valid x, y can only happen once both knobs
+        // are correctly configured. Start of path must
+        // be with a Move command. Insert that here. 
+        // see: shake()
+        if (needsInit && x != null && y != null) {
+            d = 'M' + x + ' ' + y;
+        }
         return
     }
 
@@ -83,6 +99,7 @@ function getMIDIMessage(midiMessage) {
     if (x == null || y == null) {
         return;
     }
+    // Line to
     d += 'L' + x + ' ' + y;
 
     let path = document.getElementById('path');
@@ -102,6 +119,7 @@ function setShake() {
 }
 
 function shake() {
+    // Clear data. Move to current stylus point
     d = 'M' + x + ' ' + y;
     path.setAttribute('d', d);
 }
