@@ -35,6 +35,7 @@ let scale = 2;
 var configuring = null;
 var leftControl = null;
 var rightControl = null;
+var shakeControl = null;
 
 var x = null;
 var y = null;
@@ -47,13 +48,16 @@ function getMIDIMessage(midiMessage) {
     // If we're configuring...
     if (configuring != null) {
         switch (configuring) {
-            case "left":
+            case 'left':
                 leftControl = data[1];
                 x = data[2] * scale;
                 break;
-            case "right":
+            case 'right':
                 rightControl = data[1];
                 y = (127 - data[2]) * scale;
+                break;
+            case 'shake':
+                shakeControl = data[1];
                 break;
         }
         configuring = null;
@@ -71,6 +75,9 @@ function getMIDIMessage(midiMessage) {
             y = (127 - data[2]) * scale;
             document.getElementById('right-knob').innerText = y;
             break;
+        case shakeControl:
+            shake();
+            break;
     }
 
     if (x == null || y == null) {
@@ -80,9 +87,6 @@ function getMIDIMessage(midiMessage) {
 
     let path = document.getElementById('path');
     path.setAttribute('d', d);
-
-
-    //console.log('(' + x + ', ' + y + ')');
 }
 
 function configureLeft() {
@@ -91,6 +95,10 @@ function configureLeft() {
 
 function configureRight() {
     configuring = 'right';
+}
+
+function setShake() {
+    configuring = 'shake';
 }
 
 function shake() {
